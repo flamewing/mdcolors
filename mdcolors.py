@@ -63,13 +63,13 @@ lutVDP_src_shl = {ii : FindIndex(ii, lutValsVDP_shl) for ii in xrange(256)}
 # Build lookup tables for color conversion in the index -> color direction.
 # SonMapEd destination
 lutSME_dst_def = {ii : lutValsSME_def[ii] for ii in xrange(8)}
-lutSME_dst_shl = {ii : lutValsSME_shl[ii] for ii in xrange(8)}
+lutSME_dst_shl = {ii : lutValsSME_shl[ii] for ii in xrange(15)}
 # S&KC destination
 lutSKC_dst_def = {ii : lutValsSKC_def[ii] for ii in xrange(8)}
-lutSKC_dst_shl = {ii : lutValsSKC_shl[ii] for ii in xrange(8)}
+lutSKC_dst_shl = {ii : lutValsSKC_shl[ii] for ii in xrange(15)}
 # VDP destination
 lutVDP_dst_def = {ii : lutValsVDP_def[ii] for ii in xrange(8)}
-lutVDP_dst_shl = {ii : lutValsVDP_shl[ii] for ii in xrange(8)}
+lutVDP_dst_shl = {ii : lutValsVDP_shl[ii] for ii in xrange(15)}
 
 def MDColors(image, layer, srcmode, dstmode, shlmode):
 	srclut = dict()

@@ -1,16 +1,24 @@
 ## Introduction
 
-This is a Gimp-Python plugin to convert images in Gimp to Sega Mega Drive colors.
+This is a Gimp Python-Fu plugin to convert images in Gimp to Sega Mega Drive colors.
 
 ## Installation and Usage
+
+You need to have Python 2.7.x installed (Gimp for Windows comes with it), and you need to install the `enum34` package. In Linux and MacOSX, you can install the package by issuing the following command in a terminal:
+
+```
+pip install enum34
+```
+
+In Windows, you will need to download it manually. Go to [this page](https://pypi.org/project/enum34/#files), download the latest zip file (`enum34-1.1.6.zip`, at the time of this writing) and extract it somewhere. Then find the `enum` directory, and copy it to one of the locations listed below for Windows.
 
 Copy `mdcolors.py` to your Gimp plug-ins directory. This directory is:
 
 |OS     |User scripts|System scripts|
 |-------|----|----|
 |Ubuntu/Linux  |~/.gimp-&lt;version&gt;/plug-ins|/usr/lib/gimp/2.0/plug-ins|
-|Windows|C:\\Users\\&lt;user&gt;\\.gimp-&lt;version&gt;\\plug-ins|C:\\Program Files\\GIMP 2\\lib\\gimp\\2.0\\plug-ins|
 |MacOSX |~/Library/Application Support/GIMP/&lt;version&gt;/plug-ins|/Applications/GIMP.app/Contents/Resources/lib/gimp/2.0/plug-ins|
+|Windows|C:\\Users\\&lt;user&gt;\\AppData\\Roaming\\GIMP\\&lt;version&gt;\\plug-ins|C:\\Program Files\\GIMP 2\\lib\\gimp\\2.0\\plug-ins|
 
 Replace `<version>` by your Gimp version. For example, if you are using Gimp 2.8.22, this would be `2.8`.
 

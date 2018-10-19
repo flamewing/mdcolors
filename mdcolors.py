@@ -74,57 +74,73 @@ lutVDP_dst_shl = {ii : lutValsVDP_shl[ii] for ii in xrange(15)}
 def MDColors(image, layer, srcmode, dstmode, shlmode):
 	srclut = dict()
 	dstlut = dict()
+	# Source mode
+	if srcmode == ColorMode.SonMapEd:
+		srclut = lutSME_src_def
+	elif srcmode == ColorMode.SKCollect:
+		srclut = lutSKC_src_def
+	elif srcmode == ColorMode.Measured:
+		srclut = lutVDP_src_def
+	# Dest mode
+	if dstmode == ColorMode.SonMapEd:
+		dstlut = lutSME_dst_def
+	elif dstmode == ColorMode.SKCollect:
+		dstlut = lutSKC_dst_def
+	elif dstmode == ColorMode.Measured:
+		dstlut = lutVDP_dst_def
 	if shlmode == True:
+		srclutshl = dict()
+		dstlutshl = dict()
 		# Source mode
 		if srcmode == ColorMode.SonMapEd:
-			srclut = lutSME_src_shl
+			srclutshl = lutSME_src_shl
 		elif srcmode == ColorMode.SKCollect:
-			srclut = lutSKC_src_shl
+			srclutshl = lutSKC_src_shl
 		elif srcmode == ColorMode.Measured:
-			srclut = lutVDP_src_shl
+			srclutshl = lutVDP_src_shl
 		# Dest mode
 		if dstmode == ColorMode.SonMapEd:
-			dstlut = lutSME_dst_shl
+			dstlutshl = lutSME_dst_shl
 		elif dstmode == ColorMode.SKCollect:
-			dstlut = lutSKC_dst_shl
+			dstlutshl = lutSKC_dst_shl
 		elif dstmode == ColorMode.Measured:
-			dstlut = lutVDP_dst_shl
+			dstlutshl = lutVDP_dst_shl
+		# LUT wrapper
+		lut = {ii : (dstlutshl[srclutshl[ii]],dstlut[srclut[ii]],(srclutshl[ii]%2)==0,srclutshl[ii]<=7,srclutshl[ii]>=7) for ii in xrange(256)}
 	else:
-		# Source mode
-		if srcmode == ColorMode.SonMapEd:
-			srclut = lutSME_src_def
-		elif srcmode == ColorMode.SKCollect:
-			srclut = lutSKC_src_def
-		elif srcmode == ColorMode.Measured:
-			srclut = lutVDP_src_def
-		# Dest mode
-		if dstmode == ColorMode.SonMapEd:
-			dstlut = lutSME_dst_def
-		elif dstmode == ColorMode.SKCollect:
-			dstlut = lutSKC_dst_def
-		elif dstmode == ColorMode.Measured:
-			dstlut = lutVDP_dst_def
+		# LUT wrapper
+		lut = {ii : (dstlut[srclut[ii]],dstlut[srclut[ii]],True,False,False) for ii in xrange(256)}
+
 	# For progress bar
 	progress = 0
 	gimp.progress_init("Converting to MD colors...")
 	# Indexed images are faster
 	if layer.is_indexed:
-		lut = {ii : dstlut[srclut[ii]] for ii in xrange(256)}
 		nbytes,colormap = pdb.gimp_image_get_colormap(image)
 		max_progress = nbytes
 		# Create empty colormap
 		ncolomap = []
 		# Fill new colormap by converting from old colormap
-		for ii in xrange(nbytes):
-			ncolomap.append(lut[colormap[ii]])
-			progress = progress + 1
+		for ii in xrange(nbytes/3):
+			valshl1,valnor1,norm1,shad1,high1 = lut[colormap[3*ii+0]]
+			valshl2,valnor2,norm2,shad2,high2 = lut[colormap[3*ii+1]]
+			valshl3,valnor3,norm3,shad3,high3 = lut[colormap[3*ii+2]]
+
+			if shad1 == shad2 == shad3 == True or high1 == high2 == high3 == True:
+				ncolomap.append(valshl1)
+				ncolomap.append(valshl2)
+				ncolomap.append(valshl3)
+			else:
+				ncolomap.append(valnor1)
+				ncolomap.append(valnor2)
+				ncolomap.append(valnor3)
+			progress = progress + 3
 			gimp.progress_update(float(progress) / max_progress)
 		# Activate the new colormap
 		pdb.gimp_image_set_colormap(image, nbytes, ncolomap)
 		layer.flush()
 		gimp.displays_flush()
 	else:
-		lut = {chr(ii) : chr(dstlut[srclut[ii]]) for ii in xrange(256)}
 		pdb.gimp_image_undo_group_start(image)
 		# Get the layer position.
 		pos = 0;
@@ -159,12 +175,22 @@ def MDColors(image, layer, srcmode, dstmode, shlmode):
 					for jj in xrange(srcTile.eheight):
 						# Get the pixel.
 						pixel = srcTile[ii, jj]
+						valshl1,valnor1,norm1,shad1,high1 = lut[ord(pixel[0])]
+						valshl2,valnor2,norm2,shad2,high2 = lut[ord(pixel[1])]
+						valshl3,valnor3,norm3,shad3,high3 = lut[ord(pixel[2])]
+
 						res = ''
-						for kk in xrange(len(pixel)):
-							if kk >= 3:
+						if shad1 == shad2 == shad3 == True or high1 == high2 == high3 == True:
+							res += chr(valshl1)
+							res += chr(valshl2)
+							res += chr(valshl3)
+						else:
+							res += chr(valnor1)
+							res += chr(valnor2)
+							res += chr(valnor3)
+						if len(pixel) >= 3:
+							for kk in xrange(3, len(pixel)):
 								res += pixel[kk]
-							else:
-								res += lut[pixel[kk]]
 						# Save the value in the result layer.
 						dstTile[ii, jj] = res
 		# Update the new layer.

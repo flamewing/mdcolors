@@ -18,9 +18,9 @@ Copy `mdcolors.py` to your Gimp plug-ins directory. This directory is:
 |-------|----|----|
 |Ubuntu/Linux  |~/.gimp-&lt;version&gt;/plug-ins|/usr/lib/gimp/2.0/plug-ins|
 |MacOSX |~/Library/Application Support/GIMP/&lt;version&gt;/plug-ins|/Applications/GIMP.app/Contents/Resources/lib/gimp/2.0/plug-ins|
-|Windows|C:\\Users\\&lt;user&gt;\\AppData\\Roaming\\GIMP\\&lt;version&gt;\\plug-ins|C:\\Program Files\\GIMP 2\\lib\\gimp\\2.0\\plug-ins|
+|Windows|C:\\Users\\&lt;user&gt;\\.gimp-&lt;version&gt;\\plug-ins|C:\\Program Files\\GIMP 2\\lib\\gimp\\2.0\\plug-ins|
 
-Replace `<version>` by your Gimp version. For example, if you are using Gimp 2.8.22, this would be `2.8`.
+Replace `<version>` by your Gimp version. For example, if you are using Gimp 2.8.22, this would be `2.8`. Due to issues in tiles, Gimp 2.9 and 2.10 are currently not supported for RGB images.
 
 When you restart Gimp, you should see a new menu under filters:
 

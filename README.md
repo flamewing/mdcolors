@@ -16,9 +16,9 @@ Copy `mdcolors.py` to your Gimp plug-ins directory. This directory is:
 
 |OS     |User scripts|System scripts|
 |-------|----|----|
-|Ubuntu/Linux  |~/.gimp-&lt;version&gt;/plug-ins|/usr/lib/gimp/2.0/plug-ins|
-|MacOSX |~/Library/Application Support/GIMP/&lt;version&gt;/plug-ins|/Applications/GIMP.app/Contents/Resources/lib/gimp/2.0/plug-ins|
-|Windows|C:\\Users\\&lt;user&gt;\\.gimp-&lt;version&gt;\\plug-ins|C:\\Program Files\\GIMP 2\\lib\\gimp\\2.0\\plug-ins|
+|Ubuntu/Linux  |<pre>~/.gimp-&lt;version&gt;/plug-ins</pre>|<pre>/usr/lib/gimp/2.0/plug-ins</pre>|
+|MacOSX |<pre>~/Library/Application Support/GIMP/&lt;version&gt;/plug-ins</pre>|<pre>/Applications/GIMP.app/Contents/Resources/lib/gimp/2.0/plug-ins</pre>|
+|Windows|<pre>C:\\Users\\&lt;user&gt;\\.gimp-&lt;version&gt;\\plug-ins</pre>|<pre>C:\\Program Files\\GIMP 2\\lib\\gimp\\2.0\\plug-ins</pre>|
 
 Replace `<version>` by your Gimp version. For example, if you are using Gimp 2.8.22, this would be `2.8`. Due to issues in tiles, Gimp 2.9 and 2.10 are currently not supported for RGB images.
 
@@ -38,9 +38,9 @@ Filters
 `Fix Colors` is what you want. You are greeted with 3 choices for source, 3 choices for destination, and a choice of whether to allow shadow/highlight colors or not.
 
 - **Options for source and destination:** For source, it assumes that the input image is close to the given selection. For destination, this is what you want the script to produce.
- - *SonMapEd colors:* These are the colors used by SonMapEd. Each channel (red, green, and blue) is a multiple of 32.
- - *Sonic &amp; Knuckles Collection colors:* These are the colors used by Sonic &amp; Knuckles Collection. Each channel (red, green, and blue) is a multiple of 34.
- - *VDP measurements:* These are based on voltage levels output by the VDP. They are nonlinear, and compressed in the mid-range.
+  - *SonMapEd colors:* These are the colors used by SonMapEd. Each channel (red, green, and blue) is a multiple of 32.
+  - *Sonic &amp; Knuckles Collection colors:* These are the colors used by Sonic &amp; Knuckles Collection. Each channel (red, green, and blue) is a multiple of 34.
+  - *VDP measurements:* These are based on voltage levels output by the VDP. They are nonlinear, and compressed in the mid-range.
 - **Allow shadow/highlight:** If enabled, shadow/highlight colors are accepted in the input and are generated in the output. If disabled, they are converted to the nearest normal color.
 
 The script works in both indexed and RGB images:

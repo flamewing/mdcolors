@@ -119,9 +119,8 @@ def BuildColorLUT(srcmode, dstmode, shlmode):
 		dstlutshl = SelectDstLUTShl(dstmode)
 		# LUT wrapper
 		return {ii : (dstlutshl[srclutshl[ii]],dstlut[srclut[ii]],(srclutshl[ii]%2)==0,srclutshl[ii]<=7,srclutshl[ii]>=7) for ii in xrange(256)}
-	else:
-		# LUT wrapper
-		return {ii : (dstlut[srclut[ii]],dstlut[srclut[ii]],True,False,False) for ii in xrange(256)}
+	# LUT wrapper
+	return {ii : (dstlut[srclut[ii]],dstlut[srclut[ii]],True,False,False) for ii in xrange(256)}
 
 def MDColors(image, layer, srcmode, dstmode, shlmode):
 	lut = BuildColorLUT(srcmode, dstmode, shlmode)

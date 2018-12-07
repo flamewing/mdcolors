@@ -21,10 +21,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import math, struct
-from gimpfu import *
-
+import math
+import struct
+from gimpfu import gimp
+from gimpfu import pdb
+from gimpfu import register
+from gimpfu import PF_IMAGE
+from gimpfu import PF_DRAWABLE
+from gimpfu import PF_RADIO
+from gimpfu import PF_BOOL
+from gimpfu import main
 from enum import IntEnum
+
 class ColorMode(IntEnum):
 	SonMapEd = 1
 	SKCollect = 2
@@ -71,46 +79,52 @@ lutSKC_dst_shl = {ii : lutValsSKC_shl[ii] for ii in xrange(15)}
 lutVDP_dst_def = {ii : lutValsVDP_def[ii] for ii in xrange(8)}
 lutVDP_dst_shl = {ii : lutValsVDP_shl[ii] for ii in xrange(15)}
 
-def MDColors(image, layer, srcmode, dstmode, shlmode):
-	srclut = dict()
-	dstlut = dict()
-	# Source mode
-	if srcmode == ColorMode.SonMapEd:
-		srclut = lutSME_src_def
-	elif srcmode == ColorMode.SKCollect:
-		srclut = lutSKC_src_def
-	elif srcmode == ColorMode.Measured:
-		srclut = lutVDP_src_def
-	# Dest mode
-	if dstmode == ColorMode.SonMapEd:
-		dstlut = lutSME_dst_def
-	elif dstmode == ColorMode.SKCollect:
-		dstlut = lutSKC_dst_def
-	elif dstmode == ColorMode.Measured:
-		dstlut = lutVDP_dst_def
-	if shlmode == True:
-		srclutshl = dict()
-		dstlutshl = dict()
-		# Source mode
-		if srcmode == ColorMode.SonMapEd:
-			srclutshl = lutSME_src_shl
-		elif srcmode == ColorMode.SKCollect:
-			srclutshl = lutSKC_src_shl
-		elif srcmode == ColorMode.Measured:
-			srclutshl = lutVDP_src_shl
-		# Dest mode
-		if dstmode == ColorMode.SonMapEd:
-			dstlutshl = lutSME_dst_shl
-		elif dstmode == ColorMode.SKCollect:
-			dstlutshl = lutSKC_dst_shl
-		elif dstmode == ColorMode.Measured:
-			dstlutshl = lutVDP_dst_shl
+def SelectSrcLUT(mode):
+	if mode == ColorMode.SonMapEd:
+		return lutSME_src_def
+	elif mode == ColorMode.SKCollect:
+		return lutSKC_src_def
+	elif mode == ColorMode.Measured:
+		return lutVDP_src_def
+
+def SelectSrcLUTShl(mode):
+	if mode == ColorMode.SonMapEd:
+		return lutSME_src_shl
+	elif mode == ColorMode.SKCollect:
+		return lutSKC_src_shl
+	elif mode == ColorMode.Measured:
+		return lutVDP_src_shl
+
+def SelectDstLUT(mode):
+	if mode == ColorMode.SonMapEd:
+		return lutSME_dst_def
+	elif mode == ColorMode.SKCollect:
+		return lutSKC_dst_def
+	elif mode == ColorMode.Measured:
+		return lutVDP_dst_def
+
+def SelectDstLUTShl(mode):
+	if mode == ColorMode.SonMapEd:
+		return lutSME_dst_shl
+	elif mode == ColorMode.SKCollect:
+		return lutSKC_dst_shl
+	elif mode == ColorMode.Measured:
+		return lutVDP_dst_shl
+
+def BuildColorLUT(srcmode, dstmode, shlmode):
+	srclut = SelectSrcLUT(srcmode)
+	dstlut = SelectDstLUT(dstmode)
+	if shlmode is True:
+		srclutshl = SelectSrcLUTShl(srcmode)
+		dstlutshl = SelectDstLUTShl(dstmode)
 		# LUT wrapper
-		lut = {ii : (dstlutshl[srclutshl[ii]],dstlut[srclut[ii]],(srclutshl[ii]%2)==0,srclutshl[ii]<=7,srclutshl[ii]>=7) for ii in xrange(256)}
+		return {ii : (dstlutshl[srclutshl[ii]],dstlut[srclut[ii]],(srclutshl[ii]%2)==0,srclutshl[ii]<=7,srclutshl[ii]>=7) for ii in xrange(256)}
 	else:
 		# LUT wrapper
-		lut = {ii : (dstlut[srclut[ii]],dstlut[srclut[ii]],True,False,False) for ii in xrange(256)}
+		return {ii : (dstlut[srclut[ii]],dstlut[srclut[ii]],True,False,False) for ii in xrange(256)}
 
+def MDColors(image, layer, srcmode, dstmode, shlmode):
+	lut = BuildColorLUT(srcmode, dstmode, shlmode)
 	# For progress bar
 	progress = 0
 	gimp.progress_init("Converting to MD colors...")
@@ -143,7 +157,7 @@ def MDColors(image, layer, srcmode, dstmode, shlmode):
 	else:
 		pdb.gimp_image_undo_group_start(image)
 		# Get the layer position.
-		pos = 0;
+		pos = 0
 		for ll,lay in enumerate(image.layers):
 			if lay == layer:
 				pos = ll
@@ -204,28 +218,14 @@ def MDColors(image, layer, srcmode, dstmode, shlmode):
 		pdb.gimp_image_undo_group_end(image)
 
 def MDFade(image, layer, srcmode, dstmode, fademode):
-	srclut = dict()
-	dstlut = dict()
-	# Source mode
-	if srcmode == ColorMode.SonMapEd:
-		srclut = lutSME_src_def
-	elif srcmode == ColorMode.SKCollect:
-		srclut = lutSKC_src_def
-	elif srcmode == ColorMode.Measured:
-		srclut = lutVDP_src_def
-	# Dest mode
-	if dstmode == ColorMode.SonMapEd:
-		dstlut = lutSME_dst_def
-	elif dstmode == ColorMode.SKCollect:
-		dstlut = lutSKC_dst_def
-	elif dstmode == ColorMode.Measured:
-		dstlut = lutVDP_dst_def
+	srclut = SelectSrcLUT(srcmode)
+	dstlut = SelectDstLUT(dstmode)
 	# For progress bar
 	progress = 0
 	gimp.progress_init("Generating palette fade...")
 	pdb.gimp_image_undo_group_start(image)
 	# Get the layer position.
-	pos = 0;
+	pos = 0
 	for ll,lay in enumerate(image.layers):
 		if lay == layer:
 			pos = ll

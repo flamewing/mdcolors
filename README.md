@@ -1,3 +1,5 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/flamewing/mdcolors/badge)](https://www.codefactor.io/repository/github/flamewing/mdcolors)
+
 ## Introduction
 
 This is a Gimp Python-Fu plugin to convert images in Gimp to Sega Mega Drive colors.

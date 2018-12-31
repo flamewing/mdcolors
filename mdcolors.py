@@ -21,8 +21,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import math
-import struct
 from gimpfu import gimp
 from gimpfu import pdb
 from gimpfu import register
@@ -124,8 +122,6 @@ def BuildColorLUT(srcmode, dstmode, shlmode):
 
 def MDColors(image, layer, srcmode, dstmode, shlmode):
 	lut = BuildColorLUT(srcmode, dstmode, shlmode)
-	# For progress bar
-	progress = 0
 	gimp.progress_init("Converting to MD colors...")
 	# Indexed images are faster
 	if layer.is_indexed:
@@ -133,6 +129,8 @@ def MDColors(image, layer, srcmode, dstmode, shlmode):
 		max_progress = nbytes
 		# Create empty colormap
 		ncolomap = []
+		# For progress bar
+		progress = 0
 		# Fill new colormap by converting from old colormap
 		for ii in xrange(nbytes/3):
 			valshl1,valnor1,norm1,shad1,high1 = lut[colormap[3*ii+0]]
@@ -219,8 +217,6 @@ def MDColors(image, layer, srcmode, dstmode, shlmode):
 def MDFade(image, layer, srcmode, dstmode, fademode):
 	srclut = SelectSrcLUT(srcmode)
 	dstlut = SelectDstLUT(dstmode)
-	# For progress bar
-	progress = 0
 	gimp.progress_init("Generating palette fade...")
 	pdb.gimp_image_undo_group_start(image)
 	# Get the layer position.

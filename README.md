@@ -1,4 +1,5 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/flamewing/mdcolors/badge)](https://www.codefactor.io/repository/github/flamewing/mdcolors)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/flamewing/mdcolors.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/flamewing/mdcolors/alerts/)
 
 ## Introduction
 

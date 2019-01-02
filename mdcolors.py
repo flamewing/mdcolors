@@ -229,10 +229,19 @@ def MDFade(image, layer, srcmode, dstmode, fademode):
 	pdb.gimp_image_undo_group_start(image)
 	# Get the layer position.
 	pos = FindLayer(image, layer)
+	srcWhite = srclut[255]
+	if (fademode == FadeMode.CurrentToBlack):
+		conv = lambda jj,ss: (jj*(15-ss)) // 15
+	elif (fademode == FadeMode.BlackToCurrent):
+		conv = lambda jj,ss: (jj*ss) // 15
+	elif (fademode == FadeMode.CurrentToWhite):
+		conv = lambda jj,ss: (jj*(15-ss) + srcWhite*ss) // 15
+	else:#if (fademode == FadeMode.WhiteToCurrent):
+		conv = lambda jj,ss: (jj*ss + srcWhite*(15-ss)) // 15
 	for step in xrange(15):
-		lut = {chr(ii) : chr(dstlut[srclut[ii]]) for ii in xrange(256)}
-		newLayer = layer.copy()
+		lut = {chr(ii) : chr(dstlut[srclut[conv(ii, step)]]) for ii in xrange(256)}
 		# Create a new layer to save the results (otherwise is not possible to undo the operation).
+		newLayer = layer.copy()
 		image.add_layer(newLayer, pos)
 		layerName = layer.name
 		# Clear the new layer.
@@ -249,7 +258,7 @@ def MDFade(image, layer, srcmode, dstmode, fademode):
 		for tx in xrange(tn):
 			for ty in xrange(tm):
 				# Update the progress bar.
-				gimp.progress_update(float(tx * tm + ty) / float(tn * tm) / 15.0)
+				gimp.progress_update(float(step * tn * tm + tx * tm + ty) / float(15 * tn * tm))
 				# Get the tiles.
 				srcTile = layer.get_tile(False, ty, tx)
 				dstTile = newLayer.get_tile(False, ty, tx)
@@ -304,7 +313,7 @@ register(
 	mdcolors_desc + mdcolor_info,
 	"Flamewing",
 	"Flamewing",
-	"2013-2018",
+	"2013-2019",
 	"Fix Colors...",
 	"RGB*, GRAY*, INDEXED*",
 	[
@@ -335,7 +344,7 @@ register(
 	mdfader_desc + mdcolor_info,
 	"Flamewing",
 	"Flamewing",
-	"2013-2016",
+	"2013-2019",
 	"Palette fade...",
 	"RGB*",
 	[

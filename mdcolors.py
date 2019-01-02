@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2013-2016  Flamewing <flamewing.sonic@gmail.com>
+# Copyright (C) 2013-2019  Flamewing <flamewing.sonic@gmail.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -116,49 +116,82 @@ def BuildColorLUT(srcmode, dstmode, shlmode):
 		srclutshl = SelectSrcLUTShl(srcmode)
 		dstlutshl = SelectDstLUTShl(dstmode)
 		# LUT wrapper
-		return {ii : (dstlutshl[srclutshl[ii]],dstlut[srclut[ii]],(srclutshl[ii]%2)==0,srclutshl[ii]<=7,srclutshl[ii]>=7) for ii in xrange(256)}
+		return {ii : (dstlutshl[srclutshl[ii]],dstlut[srclut[ii]],srclutshl[ii]<=7,srclutshl[ii]>=7) for ii in xrange(256)}
 	# LUT wrapper
-	return {ii : (dstlut[srclut[ii]],dstlut[srclut[ii]],True,False,False) for ii in xrange(256)}
+	return {ii : (dstlut[srclut[ii]],dstlut[srclut[ii]],False,False) for ii in xrange(256)}
+
+def ConvertColormap(image, lut):
+	nbytes,colormap = pdb.gimp_image_get_colormap(image)
+	max_progress = nbytes
+	# Create empty colormap
+	ncolomap = []
+	# For progress bar
+	progress = 0
+	# Fill new colormap by converting from old colormap
+	for ii in xrange(nbytes/3):
+		valshl1,valnor1,shad1,high1 = lut[colormap[3*ii+0]]
+		valshl2,valnor2,shad2,high2 = lut[colormap[3*ii+1]]
+		valshl3,valnor3,shad3,high3 = lut[colormap[3*ii+2]]
+
+		if shad1 == shad2 == shad3 == True or high1 == high2 == high3 == True:
+			ncolomap.append(valshl1)
+			ncolomap.append(valshl2)
+			ncolomap.append(valshl3)
+		else:
+			ncolomap.append(valnor1)
+			ncolomap.append(valnor2)
+			ncolomap.append(valnor3)
+		progress = progress + 3
+		gimp.progress_update(float(progress) / max_progress)
+	# Activate the new colormap
+	pdb.gimp_image_set_colormap(image, nbytes, ncolomap)
+	layer.flush()
+	gimp.displays_flush()
+	return
+
+def ConvertTile(srcTile, dstTile, lut):
+	# Iterate over the pixels of each tile.
+	for ii in xrange(srcTile.ewidth):
+		for jj in xrange(srcTile.eheight):
+			# Get the pixel.
+			pixel = srcTile[ii, jj]
+			valshl1,valnor1,shad1,high1 = lut[ord(pixel[0])]
+			valshl2,valnor2,shad2,high2 = lut[ord(pixel[1])]
+			valshl3,valnor3,shad3,high3 = lut[ord(pixel[2])]
+
+			res = ''
+			if shad1 == shad2 == shad3 == True or high1 == high2 == high3 == True:
+				res += chr(valshl1)
+				res += chr(valshl2)
+				res += chr(valshl3)
+			else:
+				res += chr(valnor1)
+				res += chr(valnor2)
+				res += chr(valnor3)
+			if len(pixel) >= 3:
+				for kk in xrange(3, len(pixel)):
+					res += pixel[kk]
+			# Save the value in the result layer.
+			dstTile[ii, jj] = res
+	return
+
+def FindLayer(image, layer):
+	for ll,lay in enumerate(image.layers):
+		if lay == layer:
+			return ll
+	# Should be impossible
+	assert False, "This should be unreachable... Gimp is broken."
 
 def MDColors(image, layer, srcmode, dstmode, shlmode):
 	lut = BuildColorLUT(srcmode, dstmode, shlmode)
 	gimp.progress_init("Converting to MD colors...")
 	# Indexed images are faster
 	if layer.is_indexed:
-		nbytes,colormap = pdb.gimp_image_get_colormap(image)
-		max_progress = nbytes
-		# Create empty colormap
-		ncolomap = []
-		# For progress bar
-		progress = 0
-		# Fill new colormap by converting from old colormap
-		for ii in xrange(nbytes/3):
-			valshl1,valnor1,norm1,shad1,high1 = lut[colormap[3*ii+0]]
-			valshl2,valnor2,norm2,shad2,high2 = lut[colormap[3*ii+1]]
-			valshl3,valnor3,norm3,shad3,high3 = lut[colormap[3*ii+2]]
-
-			if shad1 == shad2 == shad3 == True or high1 == high2 == high3 == True:
-				ncolomap.append(valshl1)
-				ncolomap.append(valshl2)
-				ncolomap.append(valshl3)
-			else:
-				ncolomap.append(valnor1)
-				ncolomap.append(valnor2)
-				ncolomap.append(valnor3)
-			progress = progress + 3
-			gimp.progress_update(float(progress) / max_progress)
-		# Activate the new colormap
-		pdb.gimp_image_set_colormap(image, nbytes, ncolomap)
-		layer.flush()
-		gimp.displays_flush()
+		ConvertColormap(image, lut)
 	else:
 		pdb.gimp_image_undo_group_start(image)
 		# Get the layer position.
-		pos = 0
-		for ll,lay in enumerate(image.layers):
-			if lay == layer:
-				pos = ll
-				break
+		pos = FindLayer(image, layer)
 		# Create a new layer to save the results (otherwise is not possible to undo the operation).
 		newLayer = layer.copy()
 		image.add_layer(newLayer, pos)
@@ -178,32 +211,7 @@ def MDColors(image, layer, srcmode, dstmode, shlmode):
 			for ty in xrange(tm):
 				# Update the progress bar.
 				gimp.progress_update(float(tx * tm + ty) / float(tn * tm))
-				# Get the tiles.
-				srcTile = layer.get_tile(False, ty, tx)
-				dstTile = newLayer.get_tile(False, ty, tx)
-				# Iterate over the pixels of each tile.
-				for ii in xrange(srcTile.ewidth):
-					for jj in xrange(srcTile.eheight):
-						# Get the pixel.
-						pixel = srcTile[ii, jj]
-						valshl1,valnor1,norm1,shad1,high1 = lut[ord(pixel[0])]
-						valshl2,valnor2,norm2,shad2,high2 = lut[ord(pixel[1])]
-						valshl3,valnor3,norm3,shad3,high3 = lut[ord(pixel[2])]
-
-						res = ''
-						if shad1 == shad2 == shad3 == True or high1 == high2 == high3 == True:
-							res += chr(valshl1)
-							res += chr(valshl2)
-							res += chr(valshl3)
-						else:
-							res += chr(valnor1)
-							res += chr(valnor2)
-							res += chr(valnor3)
-						if len(pixel) >= 3:
-							for kk in xrange(3, len(pixel)):
-								res += pixel[kk]
-						# Save the value in the result layer.
-						dstTile[ii, jj] = res
+				ConvertTile(layer.get_tile(False, ty, tx), newLayer.get_tile(False, ty, tx), lut)
 		# Update the new layer.
 		newLayer.flush()
 		newLayer.merge_shadow(True)
@@ -220,11 +228,7 @@ def MDFade(image, layer, srcmode, dstmode, fademode):
 	gimp.progress_init("Generating palette fade...")
 	pdb.gimp_image_undo_group_start(image)
 	# Get the layer position.
-	pos = 0
-	for ll,lay in enumerate(image.layers):
-		if lay == layer:
-			pos = ll
-			break
+	pos = FindLayer(image, layer)
 	for step in xrange(15):
 		lut = {chr(ii) : chr(dstlut[srclut[ii]]) for ii in xrange(256)}
 		newLayer = layer.copy()

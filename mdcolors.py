@@ -33,6 +33,12 @@ from gimpfu import PF_DRAWABLE
 from gimpfu import PF_RADIO
 from gimpfu import PF_BOOL
 from gimpfu import main
+
+import sys
+import os
+# extend the python path to include the script's directory
+sys.path = [os.path.dirname(os.path.realpath(__file__))] + sys.path
+
 from enum import IntEnum
 
 class ColorMode(IntEnum):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2013-2019  Flamewing <flamewing.sonic@gmail.com>
+# Copyright (C) 2013-2021  Flamewing <flamewing.sonic@gmail.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+from gimpfu import error
 from gimpfu import gimp
 from gimpfu import pdb
 from gimpfu import register
@@ -76,6 +80,18 @@ lutSKC_dst_shl = {ii : lutValsSKC_shl[ii] for ii in xrange(15)}
 # VDP destination
 lutVDP_dst_def = {ii : lutValsVDP_def[ii] for ii in xrange(8)}
 lutVDP_dst_shl = {ii : lutValsVDP_shl[ii] for ii in xrange(15)}
+
+def SelectValsLUT(mode):
+	if mode == ColorMode.SonMapEd:
+		return lutValsSME_def
+	elif mode == ColorMode.SKCollect:
+		return lutValsSKC_def
+	elif mode == ColorMode.Measured:
+		return lutValsVDP_def
+
+def FindColor(clr, mode):
+	lut = SelectValsLUT(mode)
+	return lut[FindIndex(clr, lut)]
 
 def SelectSrcLUT(mode):
 	if mode == ColorMode.SonMapEd:
@@ -229,7 +245,7 @@ def MDFade(image, layer, srcmode, dstmode, fademode):
 	pdb.gimp_image_undo_group_start(image)
 	# Get the layer position.
 	pos = FindLayer(image, layer)
-	srcWhite = srclut[255]
+	srcWhite = FindColor(255, srcmode)
 	if (fademode == FadeMode.CurrentToBlack):
 		conv = lambda jj,ss: (jj*(15-ss)) // 15
 	elif (fademode == FadeMode.BlackToCurrent):
@@ -291,21 +307,20 @@ mdcolors_desc = \
 mdfader_desc = \
 	"Coverts an image to Mega Drive colors, then performs a fade with 16 steps\n"
 
-mdcolor_info = \
-	"\n" \
-	"A 3-bit Mega Drive color channel can be represented as:\n" \
-	"  •\tSonMapEd colors:\n" \
-	"   \tNormal:\t  𝟢  𝟥𝟤  𝟨𝟦  𝟫𝟨 𝟣𝟤𝟪 𝟣𝟨𝟢 𝟣𝟫𝟤 𝟤𝟤𝟦\n" \
-	"   \tShadow:\t  𝟢  𝟣𝟨  𝟥𝟤  𝟦𝟪  𝟨𝟦  𝟪𝟢  𝟫𝟨 𝟣𝟣𝟤\n" \
-	"   \tHighlight:\t𝟣𝟣𝟤 𝟣𝟤𝟪 𝟣𝟦𝟦 𝟣𝟨𝟢 𝟣𝟩𝟨 𝟣𝟫𝟤 𝟤𝟢𝟪 𝟤𝟤𝟦\n" \
-	"  •\tSonic & Knuckles Collection (S&KC) colors:\n" \
-	"   \tNormal:\t  𝟢  𝟥𝟦  𝟨𝟪 𝟣𝟢𝟤 𝟣𝟥𝟨 𝟣𝟩𝟢 𝟤𝟢𝟦 𝟤𝟥𝟪\n" \
-	"   \tShadow:\t  𝟢  𝟣𝟩  𝟥𝟦  𝟧𝟣  𝟨𝟪  𝟪𝟧 𝟣𝟢𝟤 𝟣𝟣𝟫\n" \
-	"   \tHighlight:\t𝟣𝟣𝟫 𝟣𝟥𝟨 𝟣𝟧𝟥 𝟣𝟩𝟢 𝟣𝟪𝟩 𝟤𝟢𝟦 𝟤𝟤𝟣 𝟤𝟥𝟪\n" \
-	"  •\tVDP measurements:\n" \
-	"   \tNormal:\t  𝟢  𝟧𝟤  𝟪𝟩 𝟣𝟣𝟨 𝟣𝟦𝟦 𝟣𝟩𝟤 𝟤𝟢𝟨 𝟤𝟧𝟧\n" \
-	"   \tShadow:\t  𝟢  𝟤𝟫  𝟧𝟤  𝟩𝟢  𝟪𝟩 𝟣𝟢𝟣 𝟣𝟣𝟨 𝟣𝟥𝟢\n" \
-	"   \tHighlight:\t𝟣𝟥𝟢 𝟣𝟦𝟦 𝟣𝟧𝟪 𝟣𝟩𝟤 𝟣𝟪𝟩 𝟤𝟢𝟨 𝟤𝟤𝟪 𝟤𝟧𝟧"
+mdcolor_info = R'''
+A 3-bit Mega Drive color channel can be represented as:
+  •	SonMapEd colors:
+   	Normal:      0  32  64  96 128 160 192 224
+   	Shadow:      0  16  32  48  64  80  96 112
+   	Highlight: 112 128 144 160 176 192 208 224
+  •	Sonic & Knuckles Collection (S&KC) colors:
+   	Normal:      0  34  68 102 136 170 204 238
+   	Shadow:      0  17  34  51  68  85 102 119
+   	Highlight: 119 136 153 170 187 204 221 238
+  •	VDP measurements:
+   	Normal:      0  52  87 116 144 172 206 255
+   	Shadow:      0  29  52  70  87 101 116 130
+   	Highlight: 130 144 158 172 187 206 228 255'''
 
 register(
 	"python-fu-mega-drive-colors",
@@ -313,7 +328,7 @@ register(
 	mdcolors_desc + mdcolor_info,
 	"Flamewing",
 	"Flamewing",
-	"2013-2019",
+	"2013-2021",
 	"Fix Colors...",
 	"RGB*, GRAY*, INDEXED*",
 	[
@@ -344,20 +359,8 @@ register(
 	mdfader_desc + mdcolor_info,
 	"Flamewing",
 	"Flamewing",
-	"2013-2019",
-	"Palette fade...",
-	"RGB*",
-	[
-		(PF_IMAGE, "image", "Input image", None),
-		(PF_DRAWABLE, "layer", "Input layer", None),
-		(PF_RADIO, "srcmode", "Assume source is close to:",
-			ColorMode.SKCollect, (
-				("SonMapEd colors" , ColorMode.SonMapEd),
-				("S&KC colors"     , ColorMode.SKCollect),
-				("VDP measurements", ColorMode.Measured)
-			)
-		),
-		(PF_RADIO, "dstmode", "Destination should use:",
+	"2013-2021",
+, "dstmode", "Destination should use:",
 			ColorMode.SKCollect, (
 				("SonMapEd colors" , ColorMode.SonMapEd),
 				("S&KC colors"     , ColorMode.SKCollect),

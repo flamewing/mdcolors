@@ -37,9 +37,11 @@ Filters
     └── Palette fade...
 ```
 
-`Palette fade` is still being developed. As a result, it is disabled and cannot be used.
+`Fix Colors` converts images to Mega Drive colors. Works on indexed or RGN images.
 
-`Fix Colors` is what you want. You are greeted with 3 choices for source, 3 choices for destination, and a choice of whether to allow shadow/highlight colors or not.
+`Palette fade` does 16-step fades to/from black/white, with each step in a separate layer. This one supports only RGB images.
+
+For either plugin, You are greeted with 3 choices for source, 3 choices for destination, and a choice of whether to allow shadow/highlight colors or not.
 
 - **Options for source and destination:** For source, it assumes that the input image is close to the given selection. For destination, this is what you want the script to produce.
   - *SonMapEd colors:* These are the colors used by SonMapEd. Each channel (red, green, and blue) is a multiple of 32.

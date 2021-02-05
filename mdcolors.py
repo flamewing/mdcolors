@@ -84,9 +84,9 @@ lutVDP_dst_shl = {ii : lutValsVDP_shl[ii] for ii in xrange(15)}
 def SelectValsLUT(mode):
 	if mode == ColorMode.SonMapEd:
 		return lutValsSME_def
-	elif mode == ColorMode.SKCollect:
+	if mode == ColorMode.SKCollect:
 		return lutValsSKC_def
-	elif mode == ColorMode.Measured:
+	if mode == ColorMode.Measured:
 		return lutValsVDP_def
 
 def FindColor(clr, mode):
@@ -96,33 +96,33 @@ def FindColor(clr, mode):
 def SelectSrcLUT(mode):
 	if mode == ColorMode.SonMapEd:
 		return lutSME_src_def
-	elif mode == ColorMode.SKCollect:
+	if mode == ColorMode.SKCollect:
 		return lutSKC_src_def
-	elif mode == ColorMode.Measured:
+	if mode == ColorMode.Measured:
 		return lutVDP_src_def
 
 def SelectSrcLUTShl(mode):
 	if mode == ColorMode.SonMapEd:
 		return lutSME_src_shl
-	elif mode == ColorMode.SKCollect:
+	if mode == ColorMode.SKCollect:
 		return lutSKC_src_shl
-	elif mode == ColorMode.Measured:
+	if mode == ColorMode.Measured:
 		return lutVDP_src_shl
 
 def SelectDstLUT(mode):
 	if mode == ColorMode.SonMapEd:
 		return lutSME_dst_def
-	elif mode == ColorMode.SKCollect:
+	if mode == ColorMode.SKCollect:
 		return lutSKC_dst_def
-	elif mode == ColorMode.Measured:
+	if mode == ColorMode.Measured:
 		return lutVDP_dst_def
 
 def SelectDstLUTShl(mode):
 	if mode == ColorMode.SonMapEd:
 		return lutSME_dst_shl
-	elif mode == ColorMode.SKCollect:
+	if mode == ColorMode.SKCollect:
 		return lutSKC_dst_shl
-	elif mode == ColorMode.Measured:
+	if mode == ColorMode.Measured:
 		return lutVDP_dst_shl
 
 def BuildColorLUT(srcmode, dstmode, shlmode):
@@ -163,7 +163,6 @@ def ConvertColormap(image, lut):
 	pdb.gimp_image_set_colormap(image, nbytes, ncolomap)
 	layer.flush()
 	gimp.displays_flush()
-	return
 
 def ConvertTile(srcTile, dstTile, lut):
 	# Iterate over the pixels of each tile.
@@ -189,7 +188,6 @@ def ConvertTile(srcTile, dstTile, lut):
 					res += pixel[kk]
 			# Save the value in the result layer.
 			dstTile[ii, jj] = res
-	return
 
 def FindLayer(image, layer):
 	for ll,lay in enumerate(image.layers):
@@ -297,7 +295,7 @@ def MDFade(image, layer, srcmode, dstmode, fademode):
 		newLayer.update(0, 0, layer.width, layer.height)
 		finalLayer = newLayer
 	# Remove the old layer.
-	if finalLayer != None:
+	if finalLayer is not None:
 		layerName = layer.name
 		image.remove_layer(layer)
 		finalLayer.name = layerName

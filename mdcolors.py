@@ -254,12 +254,12 @@ def MDFade(image, layer, srcmode, dstmode, fademode):
 		conv = lambda jj,ss: (jj*(15-ss) + srcWhite*ss) // 15
 	else:#if (fademode == FadeMode.WhiteToCurrent):
 		conv = lambda jj,ss: (jj*ss + srcWhite*(15-ss)) // 15
+	finalLayer = None
 	for step in xrange(15):
 		lut = {chr(ii) : chr(dstlut[srclut[conv(ii, step)]]) for ii in xrange(256)}
 		# Create a new layer to save the results (otherwise is not possible to undo the operation).
 		newLayer = layer.copy()
 		image.add_layer(newLayer, pos)
-		layerName = layer.name
 		# Clear the new layer.
 		pdb.gimp_edit_clear(newLayer)
 		newLayer.flush()
@@ -295,9 +295,12 @@ def MDFade(image, layer, srcmode, dstmode, fademode):
 		newLayer.flush()
 		newLayer.merge_shadow(True)
 		newLayer.update(0, 0, layer.width, layer.height)
+		finalLayer = newLayer
 	# Remove the old layer.
-	image.remove_layer(layer)
-	newLayer.name = layerName
+	if finalLayer != None:
+		layerName = layer.name
+		image.remove_layer(layer)
+		finalLayer.name = layerName
 	gimp.displays_flush()
 	pdb.gimp_image_undo_group_end(image)
 

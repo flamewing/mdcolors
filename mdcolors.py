@@ -360,7 +360,19 @@ register(
 	"Flamewing",
 	"Flamewing",
 	"2013-2021",
-, "dstmode", "Destination should use:",
+	"Palette fade...",
+	"RGB*",
+	[
+		(PF_IMAGE, "image", "Input image", None),
+		(PF_DRAWABLE, "layer", "Input layer", None),
+		(PF_RADIO, "srcmode", "Assume source is close to:",
+			ColorMode.SKCollect, (
+				("SonMapEd colors" , ColorMode.SonMapEd),
+				("S&KC colors"     , ColorMode.SKCollect),
+				("VDP measurements", ColorMode.Measured)
+			)
+		),
+		(PF_RADIO, "dstmode", "Destination should use:",
 			ColorMode.SKCollect, (
 				("SonMapEd colors" , ColorMode.SonMapEd),
 				("S&KC colors"     , ColorMode.SKCollect),

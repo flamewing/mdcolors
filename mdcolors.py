@@ -21,9 +21,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os
-import sys
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 from gimpfu import error
 from gimpfu import gimp
 from gimpfu import pdb
@@ -37,7 +34,7 @@ from gimpfu import main
 import sys
 import os
 # extend the python path to include the script's directory
-sys.path = [os.path.dirname(os.path.realpath(__file__))] + sys.path
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from enum import IntEnum
 

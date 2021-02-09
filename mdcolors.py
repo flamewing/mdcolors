@@ -21,7 +21,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from gimpfu import error
 from gimpfu import gimp
 from gimpfu import pdb
 from gimpfu import register

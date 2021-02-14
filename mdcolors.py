@@ -163,7 +163,6 @@ def ConvertColormap(image, lut):
 		gimp.progress_update(float(progress) / max_progress)
 	# Activate the new colormap
 	pdb.gimp_image_set_colormap(image, nbytes, ncolomap)
-	layer.flush()
 	gimp.displays_flush()
 
 def ConvertTile(srcTile, dstTile, lut):
@@ -185,6 +184,22 @@ def ConvertTile(srcTile, dstTile, lut):
 				res += chr(valnor1)
 				res += chr(valnor2)
 				res += chr(valnor3)
+			if len(pixel) >= 3:
+				for kk in xrange(3, len(pixel)):
+					res += pixel[kk]
+			# Save the value in the result layer.
+			dstTile[ii, jj] = res
+
+def ConvertTileNoSHL(srcTile, dstTile, lut):
+	# Iterate over the pixels of each tile.
+	for ii in xrange(srcTile.ewidth):
+		for jj in xrange(srcTile.eheight):
+			# Get the pixel.
+			pixel = srcTile[ii, jj]
+			res = ''
+			res += lut[pixel[0]]
+			res += lut[pixel[1]]
+			res += lut[pixel[2]]
 			if len(pixel) >= 3:
 				for kk in xrange(3, len(pixel)):
 					res += pixel[kk]
@@ -216,18 +231,17 @@ def MDColors(image, layer, srcmode, dstmode, shlmode):
 		pdb.gimp_edit_clear(newLayer)
 		newLayer.flush()
 		# Calculate the number of tiles.
-		tn = int(layer.width / 64)
-		if (layer.width % 64) > 0:
-			tn += 1
-		tm = int(layer.height / 64)
-		if (layer.height % 64) > 0:
-			tm += 1
+		tile_width = gimp.tile_width()
+		tile_height = gimp.tile_height()
+		# Ceiling division
+		width_tiles = -(-layer.width // tile_width)
+		height_tiles = -(-layer.height // tile_height)
 		# Iterate over the tiles.
-		for tx in xrange(tn):
-			for ty in xrange(tm):
+		for col in xrange(width_tiles):
+			for row in xrange(height_tiles):
 				# Update the progress bar.
-				gimp.progress_update(float(tx * tm + ty) / float(tn * tm))
-				ConvertTile(layer.get_tile(False, ty, tx), newLayer.get_tile(False, ty, tx), lut)
+				gimp.progress_update(float(col * height_tiles + row) / float(width_tiles * height_tiles))
+				ConvertTile(layer.get_tile(False, row, col), newLayer.get_tile(False, row, col), lut)
 		# Update the new layer.
 		newLayer.flush()
 		newLayer.merge_shadow(True)
@@ -235,6 +249,7 @@ def MDColors(image, layer, srcmode, dstmode, shlmode):
 		# Remove the old layer.
 		image.remove_layer(layer)
 		newLayer.name = layerName
+		# Update display and finish undo group.
 		gimp.displays_flush()
 		pdb.gimp_image_undo_group_end(image)
 
@@ -264,33 +279,17 @@ def MDFade(image, layer, srcmode, dstmode, fademode):
 		pdb.gimp_edit_clear(newLayer)
 		newLayer.flush()
 		# Calculate the number of tiles.
-		tn = int(layer.width / 64)
-		if (layer.width % 64) > 0:
-			tn += 1
-		tm = int(layer.height / 64)
-		if (layer.height % 64) > 0:
-			tm += 1
+		tile_width = gimp.tile_width()
+		tile_height = gimp.tile_height()
+		# Ceiling division
+		width_tiles = -(-layer.width // tile_width)
+		height_tiles = -(-layer.height // tile_height)
 		# Iterate over the tiles.
-		for tx in xrange(tn):
-			for ty in xrange(tm):
+		for col in xrange(width_tiles):
+			for row in xrange(height_tiles):
 				# Update the progress bar.
-				gimp.progress_update(float(step * tn * tm + tx * tm + ty) / float(15 * tn * tm))
-				# Get the tiles.
-				srcTile = layer.get_tile(False, ty, tx)
-				dstTile = newLayer.get_tile(False, ty, tx)
-				# Iterate over the pixels of each tile.
-				for ii in xrange(srcTile.ewidth):
-					for jj in xrange(srcTile.eheight):
-						# Get the pixel.
-						pixel = srcTile[ii, jj]
-						res = ''
-						for kk in xrange(len(pixel)):
-							if kk >= 3:
-								res += pixel[kk]
-							else:
-								res += lut[pixel[kk]]
-						# Save the value in the result layer.
-						dstTile[ii, jj] = res
+				gimp.progress_update(float(step * width_tiles * height_tiles + col * height_tiles + row) / float(15 * width_tiles * height_tiles))
+				ConvertTileNoSHL(layer.get_tile(False, row, col), newLayer.get_tile(False, row, col), lut)
 		# Update the new layer.
 		newLayer.flush()
 		newLayer.merge_shadow(True)

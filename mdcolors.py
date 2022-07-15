@@ -49,47 +49,47 @@ class FadeMode(IntEnum):
 	WhiteToCurrent = 4
 
 # Normal mode valid colors per color mode
-lutValsSME_def = [0x00, 0x20, 0x40, 0x60, 0x80, 0xA0, 0xC0, 0xE0]
-lutValsSKC_def = [0x00, 0x22, 0x44, 0x66, 0x88, 0xAA, 0xCC, 0xEE]
-lutValsVDP_def = [0x00, 0x34, 0x57, 0x74, 0x90, 0xAC, 0xCE, 0xFF]
+lutValuesSME_def = [0x00, 0x20, 0x40, 0x60, 0x80, 0xA0, 0xC0, 0xE0]
+lutValuesSKC_def = [0x00, 0x22, 0x44, 0x66, 0x88, 0xAA, 0xCC, 0xEE]
+lutValuesVDP_def = [0x00, 0x34, 0x57, 0x74, 0x90, 0xAC, 0xCE, 0xFF]
 
 # Shadow/highlight mode valid colors per color mode
-lutValsSME_shl = [0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0xA0, 0xB0, 0xC0, 0xD0, 0xE0]
-lutValsSKC_shl = [0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE]
-lutValsVDP_shl = [0x00, 0x1D, 0x34, 0x46, 0x57, 0x65, 0x74, 0x82, 0x90, 0x9E, 0xAC, 0xBB, 0xCE, 0xE4, 0xFF]
+lutValuesSME_shl = [0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0xA0, 0xB0, 0xC0, 0xD0, 0xE0]
+lutValuesSKC_shl = [0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE]
+lutValuesVDP_shl = [0x00, 0x1D, 0x34, 0x46, 0x57, 0x65, 0x74, 0x82, 0x90, 0x9E, 0xAC, 0xBB, 0xCE, 0xE4, 0xFF]
 
-def FindIndex(ii, vals):
-	return min(xrange(len(vals)), key=lambda jj: abs(vals[jj]-ii))
+def FindIndex(ii, values):
+	return min(xrange(len(values)), key=lambda jj: abs(values[jj]-ii))
 
 # Build lookup tables for color conversion in the color -> index direction.
 # SonMapEd-like source
-lutSME_src_def = {ii : FindIndex(ii, lutValsSME_def) for ii in xrange(256)}
-lutSME_src_shl = {ii : FindIndex(ii, lutValsSME_shl) for ii in xrange(256)}
+lutSME_src_def = {ii : FindIndex(ii, lutValuesSME_def) for ii in xrange(256)}
+lutSME_src_shl = {ii : FindIndex(ii, lutValuesSME_shl) for ii in xrange(256)}
 # S&KC-like source
-lutSKC_src_def = {ii : FindIndex(ii, lutValsSKC_def) for ii in xrange(256)}
-lutSKC_src_shl = {ii : FindIndex(ii, lutValsSKC_shl) for ii in xrange(256)}
+lutSKC_src_def = {ii : FindIndex(ii, lutValuesSKC_def) for ii in xrange(256)}
+lutSKC_src_shl = {ii : FindIndex(ii, lutValuesSKC_shl) for ii in xrange(256)}
 # VDP-like source
-lutVDP_src_def = {ii : FindIndex(ii, lutValsVDP_def) for ii in xrange(256)}
-lutVDP_src_shl = {ii : FindIndex(ii, lutValsVDP_shl) for ii in xrange(256)}
+lutVDP_src_def = {ii : FindIndex(ii, lutValuesVDP_def) for ii in xrange(256)}
+lutVDP_src_shl = {ii : FindIndex(ii, lutValuesVDP_shl) for ii in xrange(256)}
 
 # Build lookup tables for color conversion in the index -> color direction.
 # SonMapEd destination
-lutSME_dst_def = {ii : lutValsSME_def[ii] for ii in xrange(8)}
-lutSME_dst_shl = {ii : lutValsSME_shl[ii] for ii in xrange(15)}
+lutSME_dst_def = {ii : lutValuesSME_def[ii] for ii in xrange(8)}
+lutSME_dst_shl = {ii : lutValuesSME_shl[ii] for ii in xrange(15)}
 # S&KC destination
-lutSKC_dst_def = {ii : lutValsSKC_def[ii] for ii in xrange(8)}
-lutSKC_dst_shl = {ii : lutValsSKC_shl[ii] for ii in xrange(15)}
+lutSKC_dst_def = {ii : lutValuesSKC_def[ii] for ii in xrange(8)}
+lutSKC_dst_shl = {ii : lutValuesSKC_shl[ii] for ii in xrange(15)}
 # VDP destination
-lutVDP_dst_def = {ii : lutValsVDP_def[ii] for ii in xrange(8)}
-lutVDP_dst_shl = {ii : lutValsVDP_shl[ii] for ii in xrange(15)}
+lutVDP_dst_def = {ii : lutValuesVDP_def[ii] for ii in xrange(8)}
+lutVDP_dst_shl = {ii : lutValuesVDP_shl[ii] for ii in xrange(15)}
 
 def SelectValsLUT(mode):
 	if mode == ColorMode.SonMapEd:
-		return lutValsSME_def
+		return lutValuesSME_def
 	if mode == ColorMode.SKCollect:
-		return lutValsSKC_def
+		return lutValuesSKC_def
 	if mode == ColorMode.Measured:
-		return lutValsVDP_def
+		return lutValuesVDP_def
 
 def FindColor(clr, mode):
 	lut = SelectValsLUT(mode)
@@ -127,42 +127,42 @@ def SelectDstLUTShl(mode):
 	if mode == ColorMode.Measured:
 		return lutVDP_dst_shl
 
-def BuildColorLUT(srcmode, dstmode, shlmode):
-	srclut = SelectSrcLUT(srcmode)
-	dstlut = SelectDstLUT(dstmode)
-	if shlmode is True:
-		srclutshl = SelectSrcLUTShl(srcmode)
-		dstlutshl = SelectDstLUTShl(dstmode)
+def BuildColorLUT(source_mode, target_mode, shl_mode):
+	source_lut = SelectSrcLUT(source_mode)
+	target_lut = SelectDstLUT(target_mode)
+	if shl_mode is True:
+		source_lut_shl = SelectSrcLUTShl(source_mode)
+		target_lut_shl = SelectDstLUTShl(target_mode)
 		# LUT wrapper
-		return {ii : (dstlutshl[srclutshl[ii]],dstlut[srclut[ii]],srclutshl[ii]<=7,srclutshl[ii]>=7) for ii in xrange(256)}
+		return {ii : (target_lut_shl[source_lut_shl[ii]],target_lut[source_lut[ii]],source_lut_shl[ii]<=7,source_lut_shl[ii]>=7) for ii in xrange(256)}
 	# LUT wrapper
-	return {ii : (dstlut[srclut[ii]],dstlut[srclut[ii]],False,False) for ii in xrange(256)}
+	return {ii : (target_lut[source_lut[ii]],target_lut[source_lut[ii]],False,False) for ii in xrange(256)}
 
 def ConvertColormap(image, lut):
-	nbytes,colormap = pdb.gimp_image_get_colormap(image)
-	max_progress = nbytes
+	num_bytes,colormap = pdb.gimp_image_get_colormap(image)
+	max_progress = num_bytes
 	# Create empty colormap
-	ncolomap = []
+	new_colormap = []
 	# For progress bar
 	progress = 0
 	# Fill new colormap by converting from old colormap
-	for ii in xrange(nbytes/3):
-		valshl1,valnor1,shad1,high1 = lut[colormap[3*ii+0]]
-		valshl2,valnor2,shad2,high2 = lut[colormap[3*ii+1]]
-		valshl3,valnor3,shad3,high3 = lut[colormap[3*ii+2]]
+	for ii in xrange(num_bytes/3):
+		values_shl1,normal_value1,shadow1,highlight1 = lut[colormap[3*ii+0]]
+		values_shl2,normal_value2,shadow2,highlight2 = lut[colormap[3*ii+1]]
+		values_shl3,normal_value3,shadow3,highlight3 = lut[colormap[3*ii+2]]
 
-		if shad1 == shad2 == shad3 == True or high1 == high2 == high3 == True:
-			ncolomap.append(valshl1)
-			ncolomap.append(valshl2)
-			ncolomap.append(valshl3)
+		if shadow1 == shadow2 == shadow3 == True or highlight1 == highlight2 == highlight3 == True:
+			new_colormap.append(values_shl1)
+			new_colormap.append(values_shl2)
+			new_colormap.append(values_shl3)
 		else:
-			ncolomap.append(valnor1)
-			ncolomap.append(valnor2)
-			ncolomap.append(valnor3)
+			new_colormap.append(normal_value1)
+			new_colormap.append(normal_value2)
+			new_colormap.append(normal_value3)
 		progress = progress + 3
 		gimp.progress_update(float(progress) / max_progress)
 	# Activate the new colormap
-	pdb.gimp_image_set_colormap(image, nbytes, ncolomap)
+	pdb.gimp_image_set_colormap(image, num_bytes, new_colormap)
 	gimp.displays_flush()
 
 def ConvertTile(srcTile, dstTile, lut):
@@ -171,19 +171,19 @@ def ConvertTile(srcTile, dstTile, lut):
 		for jj in xrange(srcTile.eheight):
 			# Get the pixel.
 			pixel = srcTile[ii, jj]
-			valshl1,valnor1,shad1,high1 = lut[ord(pixel[0])]
-			valshl2,valnor2,shad2,high2 = lut[ord(pixel[1])]
-			valshl3,valnor3,shad3,high3 = lut[ord(pixel[2])]
+			values_shl1,normal_value1,shadow1,highlight1 = lut[ord(pixel[0])]
+			values_shl2,normal_value2,shadow2,highlight2 = lut[ord(pixel[1])]
+			values_shl3,normal_value3,shadow3,highlight3 = lut[ord(pixel[2])]
 
 			res = ''
-			if shad1 == shad2 == shad3 == True or high1 == high2 == high3 == True:
-				res += chr(valshl1)
-				res += chr(valshl2)
-				res += chr(valshl3)
+			if shadow1 == shadow2 == shadow3 == True or highlight1 == highlight2 == highlight3 == True:
+				res += chr(values_shl1)
+				res += chr(values_shl2)
+				res += chr(values_shl3)
 			else:
-				res += chr(valnor1)
-				res += chr(valnor2)
-				res += chr(valnor3)
+				res += chr(normal_value1)
+				res += chr(normal_value2)
+				res += chr(normal_value3)
 			if len(pixel) >= 3:
 				for kk in xrange(3, len(pixel)):
 					res += pixel[kk]
@@ -213,8 +213,8 @@ def FindLayer(image, layer):
 	# Should be impossible
 	assert False, "This should be unreachable... Gimp is broken."
 
-def MDColors(image, layer, srcmode, dstmode, shlmode):
-	lut = BuildColorLUT(srcmode, dstmode, shlmode)
+def MDColors(image, layer, source_mode, target_mode, shl_mode):
+	lut = BuildColorLUT(source_mode, target_mode, shl_mode)
 	gimp.progress_init("Converting to MD colors...")
 	# Indexed images are faster
 	if layer.is_indexed:
@@ -253,25 +253,25 @@ def MDColors(image, layer, srcmode, dstmode, shlmode):
 		gimp.displays_flush()
 		pdb.gimp_image_undo_group_end(image)
 
-def MDFade(image, layer, srcmode, dstmode, fademode):
-	srclut = SelectSrcLUT(srcmode)
-	dstlut = SelectDstLUT(dstmode)
+def MDFade(image, layer, source_mode, target_mode, fade_mode):
+	source_lut = SelectSrcLUT(source_mode)
+	target_lut = SelectDstLUT(target_mode)
 	gimp.progress_init("Generating palette fade...")
 	pdb.gimp_image_undo_group_start(image)
 	# Get the layer position.
 	pos = FindLayer(image, layer)
-	srcWhite = FindColor(255, srcmode)
-	if (fademode == FadeMode.CurrentToBlack):
-		conv = lambda jj,ss: (jj*(15-ss)) // 15
-	elif (fademode == FadeMode.BlackToCurrent):
-		conv = lambda jj,ss: (jj*ss) // 15
-	elif (fademode == FadeMode.CurrentToWhite):
-		conv = lambda jj,ss: (jj*(15-ss) + srcWhite*ss) // 15
-	else:#if (fademode == FadeMode.WhiteToCurrent):
-		conv = lambda jj,ss: (jj*ss + srcWhite*(15-ss)) // 15
+	srcWhite = FindColor(255, source_mode)
+	if (fade_mode == FadeMode.CurrentToBlack):
+		converter = lambda jj,ss: (jj*(15-ss)) // 15
+	elif (fade_mode == FadeMode.BlackToCurrent):
+		converter = lambda jj,ss: (jj*ss) // 15
+	elif (fade_mode == FadeMode.CurrentToWhite):
+		converter = lambda jj,ss: (jj*(15-ss) + srcWhite*ss) // 15
+	else:#if (fade_mode == FadeMode.WhiteToCurrent):
+		converter = lambda jj,ss: (jj*ss + srcWhite*(15-ss)) // 15
 	finalLayer = None
 	for step in xrange(15):
-		lut = {chr(ii) : chr(dstlut[srclut[conv(ii, step)]]) for ii in xrange(256)}
+		lut = {chr(ii) : chr(target_lut[source_lut[converter(ii, step)]]) for ii in xrange(256)}
 		# Create a new layer to save the results (otherwise is not possible to undo the operation).
 		newLayer = layer.copy()
 		image.add_layer(newLayer, pos)
@@ -303,13 +303,13 @@ def MDFade(image, layer, srcmode, dstmode, fademode):
 	gimp.displays_flush()
 	pdb.gimp_image_undo_group_end(image)
 
-mdcolors_desc = \
+colors_desc = \
 	"Coverts an image to Mega Drive colors.\n"
 
-mdfader_desc = \
+fader_desc = \
 	"Coverts an image to Mega Drive colors, then performs a fade with 16 steps\n"
 
-mdcolor_info = R'''
+color_info = R'''
 A 3-bit Mega Drive color channel can be represented as:
   •	SonMapEd colors:
    	Normal:      0  32  64  96 128 160 192 224
@@ -326,8 +326,8 @@ A 3-bit Mega Drive color channel can be represented as:
 
 register(
 	"python-fu-mega-drive-colors",
-	mdcolors_desc + mdcolor_info,
-	mdcolors_desc + mdcolor_info,
+	f"{colors_desc}{color_info}",
+	f"{colors_desc}{color_info}",
 	"Flamewing",
 	"Flamewing",
 	"2013-2021",
@@ -336,29 +336,29 @@ register(
 	[
 		(PF_IMAGE, "image", "Input image", None),
 		(PF_DRAWABLE, "layer", "Input layer", None),
-		(PF_RADIO, "srcmode", "Assume source is close to:",
+		(PF_RADIO, "source_mode", "Assume source is close to:",
 			ColorMode.SKCollect, (
 				("SonMapEd colors" , ColorMode.SonMapEd),
 				("S&KC colors"     , ColorMode.SKCollect),
 				("VDP measurements", ColorMode.Measured)
 			)
 		),
-		(PF_RADIO, "dstmode", "Destination should use:",
+		(PF_RADIO, "target_mode", "Destination should use:",
 			ColorMode.SKCollect, (
 				("SonMapEd colors" , ColorMode.SonMapEd),
 				("S&KC colors"     , ColorMode.SKCollect),
 				("VDP measurements", ColorMode.Measured)
 			)
 		),
-		(PF_BOOL, "shlmode", "Allow shadow/highlight colors:", False),
+		(PF_BOOL, "shl_mode", "Allow shadow/highlight colors:", False),
 	],
 	[],
 	MDColors, menu="<Image>/Filters/Mega Drive")
 
 register(
 	"python-fu-mega-drive-fade",
-	mdfader_desc + mdcolor_info,
-	mdfader_desc + mdcolor_info,
+	f"{fader_desc}{color_info}",
+	f"{fader_desc}{color_info}",
 	"Flamewing",
 	"Flamewing",
 	"2013-2021",
@@ -367,21 +367,21 @@ register(
 	[
 		(PF_IMAGE, "image", "Input image", None),
 		(PF_DRAWABLE, "layer", "Input layer", None),
-		(PF_RADIO, "srcmode", "Assume source is close to:",
+		(PF_RADIO, "source_mode", "Assume source is close to:",
 			ColorMode.SKCollect, (
 				("SonMapEd colors" , ColorMode.SonMapEd),
 				("S&KC colors"     , ColorMode.SKCollect),
 				("VDP measurements", ColorMode.Measured)
 			)
 		),
-		(PF_RADIO, "dstmode", "Destination should use:",
+		(PF_RADIO, "target_mode", "Destination should use:",
 			ColorMode.SKCollect, (
 				("SonMapEd colors" , ColorMode.SonMapEd),
 				("S&KC colors"     , ColorMode.SKCollect),
 				("VDP measurements", ColorMode.Measured)
 			)
 		),
-		(PF_RADIO, "fademode", "Fade mode:",
+		(PF_RADIO, "fade_mode", "Fade mode:",
 			ColorMode.SKCollect, (
 				("Current to black", FadeMode.CurrentToBlack),
 				("Black to current", FadeMode.BlackToCurrent),
